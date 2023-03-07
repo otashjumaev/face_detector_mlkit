@@ -17,23 +17,25 @@
 package uz.ojtest.facedetectiontest.ui
 
 import android.annotation.SuppressLint
+import android.hardware.camera2.CaptureRequest
 import android.os.Bundle
 import android.util.Log
+import android.util.Range
 import android.widget.CompoundButton
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.camera2.interop.Camera2Interop
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import com.google.mlkit.common.MlKitException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import uz.ojtest.facedetectiontest.base.Fps
 import uz.ojtest.facedetectiontest.databinding.ActivityVisionCameraxLivePreviewBinding
 import uz.ojtest.facedetectiontest.ui.vm.FaceDetectorViewModel
 import uz.ojtest.facedetectiontest.utils.processor.FaceDetectorProcessor
 
+@ExperimentalCamera2Interop
 @ExperimentalGetImage
 /** Live preview demo app for ML Kit APIs using CameraX. */
 class FaceDetectorActivity : AppCompatActivity(), CompoundButton.OnCheckedChangeListener {
@@ -101,6 +103,8 @@ class FaceDetectorActivity : AppCompatActivity(), CompoundButton.OnCheckedChange
             val targetResolution = viewModel.getCameraXTargetResolution()
             val previewUC = Preview.Builder().run {
                 if (targetResolution != null) setTargetResolution(targetResolution)
+                val camera2Interop = Camera2Interop.Extender(this)
+                camera2Interop.setCaptureRequestOption(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, Range(15, 15))
                 build()
             }
             previewUC.setSurfaceProvider(binding.previewView.surfaceProvider)
@@ -109,6 +113,8 @@ class FaceDetectorActivity : AppCompatActivity(), CompoundButton.OnCheckedChange
             val analysisUC = ImageAnalysis.Builder().run {
                 if (targetResolution != null) setTargetResolution(targetResolution)
                 setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                val camera2Interop = Camera2Interop.Extender(this)
+                camera2Interop.setCaptureRequestOption(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, Range(15, 15))
                 build()
             }
 
